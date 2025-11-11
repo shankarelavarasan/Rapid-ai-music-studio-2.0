@@ -1,0 +1,7 @@
+{
+  "name": "SmartTrack Duo",
+  "description": "A multi-track beat and instrument composer application built with React. Users can record or tap rhythms, apply them to various instrument samples, and arrange them in a track list with individual playback controls.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
