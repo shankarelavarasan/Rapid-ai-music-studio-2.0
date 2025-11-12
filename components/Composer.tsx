@@ -242,7 +242,7 @@ const Composer: React.FC<ComposerProps> = ({ onClose, onCompose, bpm, quantizeVa
 
   const renderMainContent = () => {
     if (mode === 'expressive') {
-        return <ExpressivePad onFinish={handleExpressivePadFinish} />;
+        return <ExpressivePad onFinish={handleExpressivePadFinish} bpm={bpm} quantizeValue={quantizeValue} />;
     }
 
     if (!selectedSample) {

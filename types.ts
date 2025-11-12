@@ -20,6 +20,8 @@ export interface ExpressiveNote {
     time: number;
     duration: number;
     pitch: PitchType;
+    midiNote: number;
+    volume: number;
 }
 
 export interface BeatEvent {

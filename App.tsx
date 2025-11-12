@@ -222,6 +222,56 @@ const App: React.FC = () => {
     return synth;
   };
 
+  // Drum voice pool helpers (moved inside App to access refs)
+  const createDrumVoice = (type: string): Tone.ToneAudioNode => {
+    switch (type) {
+      case 'kick':
+        return new Tone.MembraneSynth({
+          pitchDecay: 0.05,
+          octaves: 4,
+          envelope: { attack: 0.001, decay: 0.2, sustain: 0.0, release: 0.5 }
+        });
+      case 'snare':
+        return new Tone.NoiseSynth({
+          noise: { type: 'white' },
+          envelope: { attack: 0.001, decay: 0.2, sustain: 0 }
+        });
+      case 'hihat':
+        return new Tone.MetalSynth({
+          frequency: 250,
+          envelope: { attack: 0.001, decay: 0.1, release: 0.1 }
+        });
+      case 'clap':
+        return new Tone.NoiseSynth({
+          noise: { type: 'white' },
+          envelope: { attack: 0.001, decay: 0.15, sustain: 0 }
+        });
+      case 'tom':
+        return new Tone.MembraneSynth({
+          pitchDecay: 0.08,
+          octaves: 2,
+          envelope: { attack: 0.005, decay: 0.3, sustain: 0.0, release: 0.6 }
+        });
+      default:
+        return new Tone.NoiseSynth();
+    }
+  };
+
+  const getDrumVoice = (type: string): Tone.ToneAudioNode => {
+    if (!drumVoicePoolsRef.current.has(type)) {
+      // create a small voice pool to avoid overlapping start times on the same voice
+      const poolSize = 4;
+      const pool: Tone.ToneAudioNode[] = Array.from({ length: poolSize }, () => createDrumVoice(type));
+      drumVoicePoolsRef.current.set(type, pool);
+      drumVoiceIndexRef.current.set(type, 0);
+    }
+    const pool = drumVoicePoolsRef.current.get(type)!;
+    const idx = drumVoiceIndexRef.current.get(type)!;
+    const voice = pool[idx % pool.length];
+    drumVoiceIndexRef.current.set(type, (idx + 1) % pool.length);
+    return voice;
+  };
+
   const createToneWrapper = (id: string): any => {
     // id formats:
     // tone:instrument:<family>:<note>
@@ -517,53 +567,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
-
-const createDrumVoice = (type: string): Tone.ToneAudioNode => {
-  switch (type) {
-    case 'kick':
-      return new Tone.MembraneSynth({
-        pitchDecay: 0.05,
-        octaves: 4,
-        envelope: { attack: 0.001, decay: 0.2, sustain: 0.0, release: 0.5 }
-      });
-    case 'snare':
-      return new Tone.NoiseSynth({
-        noise: { type: 'white' },
-        envelope: { attack: 0.001, decay: 0.2, sustain: 0 }
-      });
-    case 'hihat':
-      return new Tone.MetalSynth({
-        frequency: 250,
-        envelope: { attack: 0.001, decay: 0.1, release: 0.1 }
-      });
-    case 'clap':
-      return new Tone.NoiseSynth({
-        noise: { type: 'white' },
-        envelope: { attack: 0.001, decay: 0.15, sustain: 0 }
-      });
-    case 'tom':
-      return new Tone.MembraneSynth({
-        pitchDecay: 0.08,
-        octaves: 2,
-        envelope: { attack: 0.005, decay: 0.3, sustain: 0.0, release: 0.6 }
-      });
-    default:
-      return new Tone.NoiseSynth();
-  }
-};
-
-const getDrumVoice = (type: string): Tone.ToneAudioNode => {
-    if (!drumVoicePoolsRef.current.has(type)) {
-      // create a small voice pool to avoid overlapping start times on the same voice
-      const poolSize = 4;
-      const pool: Tone.ToneAudioNode[] = Array.from({ length: poolSize }, () => createDrumVoice(type));
-      drumVoicePoolsRef.current.set(type, pool);
-      drumVoiceIndexRef.current.set(type, 0);
-    }
-    const pool = drumVoicePoolsRef.current.get(type)!;
-    const idx = drumVoiceIndexRef.current.get(type)!;
-    const voice = pool[idx % pool.length];
-    drumVoiceIndexRef.current.set(type, (idx + 1) % pool.length);
-    return voice;
-  };
